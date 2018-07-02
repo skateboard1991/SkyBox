@@ -100,8 +100,9 @@ class SkyBoxView(context: Context, attributeSet: AttributeSet?) : GLSurfaceView(
     private fun initConfig()
     {
         setEGLContextClientVersion(3)
-//        renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
         setRenderer(SkyBoxRender(context))
+        renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+
     }
 
 

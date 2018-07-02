@@ -70,8 +70,6 @@ class SkyBoxRender(private val context: Context) : GLSurfaceView.Renderer
     {
         val vertexPath = context.applicationContext.packageCodePath + File.separator + SLGL + File.separator + "vertex.slgl"
         val fragmentPath = context.applicationContext.packageCodePath + File.separator + SLGL + File.separator + "fragment.slgl"
-        println("vertexPath is $vertexPath")
-        println("fragmentPath is $fragmentPath")
         program = genProgram(vertexPath, fragmentPath)
         vao = preparePos(pos)
         texture = prepareTexture()
