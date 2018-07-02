@@ -1,0 +1,16 @@
+*.iml
+.gradle
+/local.properties
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.idea/misc.xml
+.idea/vcs.xml
+.idea/runConfigurations.xml
+.idea/gradle.xml
+.idea/codeStyles/Project.xml
+.idea/caches/build_file_checksums.ser
