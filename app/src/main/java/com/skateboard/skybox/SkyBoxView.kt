@@ -13,19 +13,19 @@ class SkyBoxView(context: Context, attributeSet: AttributeSet?) : GLSurfaceView(
 {
 
 
-    private lateinit var sensorManager: SensorManager
-
-    private lateinit var accSensor: Sensor
-
-    private lateinit var magneticSensor:Sensor
-
-    private val R=FloatArray(9)
-
-    private val degrees=FloatArray(3)
-
-    private var acc=FloatArray(3)
-
-    private var magnetic=FloatArray(3)
+//    private lateinit var sensorManager: SensorManager
+//
+//    private lateinit var accSensor: Sensor
+//
+//    private lateinit var magneticSensor:Sensor
+//
+//    private val R=FloatArray(9)
+//
+//    private val degrees=FloatArray(3)
+//
+//    private var acc=FloatArray(3)
+//
+//    private var magnetic=FloatArray(3)
 
     private lateinit var skyBoxRender: SkyBoxRender
 
