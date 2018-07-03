@@ -3,14 +3,11 @@ package com.skateboard.skybox
 import android.content.Context
 import android.graphics.SurfaceTexture
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.hardware.SensorManager.SENSOR_DELAY_NORMAL
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
-import java.lang.Math.cos
-import java.lang.Math.sin
+import android.view.MotionEvent
+
 
 class SkyBoxView(context: Context, attributeSet: AttributeSet?) : GLSurfaceView(context, attributeSet), SurfaceTexture.OnFrameAvailableListener
 {
@@ -18,89 +15,111 @@ class SkyBoxView(context: Context, attributeSet: AttributeSet?) : GLSurfaceView(
 
     private lateinit var sensorManager: SensorManager
 
-    private lateinit var sensor: Sensor
+    private lateinit var accSensor: Sensor
 
-    private var picth=0.0f
+    private lateinit var magneticSensor:Sensor
 
-    private var yaw=0.0f
+    private val R=FloatArray(9)
+
+    private val degrees=FloatArray(3)
+
+    private var acc=FloatArray(3)
+
+    private var magnetic=FloatArray(3)
+
+    private lateinit var skyBoxRender: SkyBoxRender
+
+    private var lastX=0F
+
+    private var lastY=0F
+
+    private var yaw=0f
+
+    private var pitch=0f
+
+    private var screenWidth=0
+
+    private var screenHeight=0
+
+    private var horSensity=0.03f
+
+    private var verSensity=0.03f
 
     constructor(context: Context) : this(context, null)
 
     init
     {
-        initSensor()
+//        initSensor()
+        initSensity()
         initConfig()
     }
 
-    private val sensorEventListener = object : SensorEventListener
+    private fun initSensity()
     {
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int)
-        {
+        screenWidth=resources.displayMetrics.widthPixels
+        screenHeight=resources.displayMetrics.heightPixels
+        horSensity= 360.0f/screenWidth
+        verSensity=180.0f/screenHeight
+    }
 
-        }
-
-        override fun onSensorChanged(event: SensorEvent?)
-        {
-            if(event!=null)
-            {
-                // This timestep's delta rotation to be multiplied by the current rotation
-                // after computing it from the gyro sample data.
-//                if (timestamp !== 0)
-//                {
-//                    val dT = (event.timestamp - timestamp) * NS2S
-//                    // Axis of the rotation sample, not normalized yet.
-//                    var axisX = event.values[0]
-//                    var axisY = event.values[1]
-//                    var axisZ = event.values[2]
+//    private val sensorEventListener = object : SensorEventListener
+//    {
+//        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int)
+//        {
 //
-//                    // Calculate the angular speed of the sample
-//                    val omegaMagnitude = sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ)
+//        }
 //
-//                    // Normalize the rotation vector if it's big enough to get the axis
-//                    // (that is, EPSILON should represent your maximum allowable margin of error)
-//                    if (omegaMagnitude > EPSILON)
-//                    {
-//                        axisX /= omegaMagnitude
-//                        axisY /= omegaMagnitude
-//                        axisZ /= omegaMagnitude
-//                    }
+//        override fun onSensorChanged(event: SensorEvent?)
+//        {
+//            if(event!=null)
+//            {
 //
-//                    // Integrate around this axis with the angular speed by the timestep
-//                    // in order to get a delta rotation from this sample over the timestep
-//                    // We will convert this axis-angle representation of the delta rotation
-//                    // into a quaternion before turning it into the rotation matrix.
-//                    val thetaOverTwo = omegaMagnitude * dT / 2.0f
-//                    val sinThetaOverTwo = sin(thetaOverTwo)
-//                    val cosThetaOverTwo = cos(thetaOverTwo)
-//                    deltaRotationVector[0] = sinThetaOverTwo * axisX
-//                    deltaRotationVector[1] = sinThetaOverTwo * axisY
-//                    deltaRotationVector[2] = sinThetaOverTwo * axisZ
-//                    deltaRotationVector[3] = cosThetaOverTwo
+//                if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
+//                    magnetic = event.values
 //                }
-//                timestamp = event.timestamp
-//                val deltaRotationMatrix = FloatArray(9)
-//                SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector)
-//                // User code should concatenate the delta rotation we computed with the current rotation
-//                // in order to get the updated rotation.
-//                // rotationCurrent = rotationCurrent * deltaRotationMatrix;
+//                if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+//                    acc = event.values
+//                    calValue()
+//                    rotate()
+//                }
+//
+//            }
+//
+//        }
+//    }
+//
+//    private fun calValue()
+//    {
+//        SensorManager.getRotationMatrix(R,null,acc,magnetic)
+//        SensorManager.getOrientation(R,degrees)
+//        for(i in degrees)
+//        {
+//            println("degree is ${Math.toDegrees(i.toDouble())}")
+//        }
+//    }
 
+    private fun rotate(pitch:Float,yaw:Float)
+    {
+        queueEvent {
 
-            }
-
+            skyBoxRender.rotate(pitch,yaw)
         }
     }
 
-    private fun initSensor()
-    {
-        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
-
-    }
+//    private fun initSensor()
+//    {
+//
+//        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+//        magneticSensor=sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+//        accSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+//
+//    }
 
     private fun initConfig()
     {
         setEGLContextClientVersion(3)
-        setRenderer(SkyBoxRender(context))
+        skyBoxRender=SkyBoxRender(context)
+        setRenderer(skyBoxRender)
         renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
 
     }
@@ -114,12 +133,43 @@ class SkyBoxView(context: Context, attributeSet: AttributeSet?) : GLSurfaceView(
     override fun onResume()
     {
         super.onResume()
-        sensorManager.registerListener(sensorEventListener, sensor, SENSOR_DELAY_NORMAL)
+//        sensorManager.registerListener(sensorEventListener, accSensor, SENSOR_DELAY_NORMAL)
+//        sensorManager.registerListener(sensorEventListener,magneticSensor,SENSOR_DELAY_NORMAL)
     }
 
     override fun onPause()
     {
         super.onPause()
-        sensorManager.unregisterListener(sensorEventListener, sensor)
+//        sensorManager.unregisterListener(sensorEventListener, accSensor)
+//        sensorManager.unregisterListener(sensorEventListener,magneticSensor)
     }
+
+
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean
+    {
+        when(event?.action)
+        {
+            MotionEvent.ACTION_DOWN->
+            {
+                lastX=event.x
+                lastY=event.y
+                return true
+            }
+
+            MotionEvent.ACTION_MOVE->
+            {
+                val offsetX=event.x-lastX
+                val offsetY=lastY-event.y
+                yaw+=offsetX*horSensity
+                pitch+=offsetY*verSensity
+                lastX=event.x
+                lastY=event.y
+                skyBoxRender.rotate(pitch,yaw)
+            }
+        }
+
+        return true
+    }
+
 }

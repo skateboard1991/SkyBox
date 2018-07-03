@@ -2,44 +2,27 @@
 // Created by wujiaxin1 on 2018/6/22.
 //
 #include <GLUtils/GLUtils.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#include <android/log.h>
+#define  LOG_TAG    "skyboxjni"
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 using namespace std;
 namespace glutils {
 
-    int loadShader(string filePath, int type) {
-        ifstream file;
-        string content;
-        try {
-            file.open(filePath, ios::in);
-            ostringstream str;
-            char ch;
-            if (file.is_open()) {
-                while (str && file.get(ch)) {
-                    str.put(ch);
-                }
-            };
-            file.close();
-            content=str.str();
-        }
-        catch(std::ifstream::failure e)
-        {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-        }
-        const char *shaderSource = content.c_str();
+    int loadShader(string shaderSource, int type) {
+        const char *shaderSourceP = shaderSource.c_str();
         int shader = glCreateShader(type);
         if (!shader) {
-            cout << "create shader failed" << endl;
+            LOGE("create shader failed \n");
         }
-        glShaderSource(shader, 1, &shaderSource, nullptr);
+        glShaderSource(shader, 1, &shaderSourceP, nullptr);
         glCompileShader(shader);
         int success = 0;
         GLchar infoLog[512];
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-            cout << "compile shader failed " << infoLog << endl;
+            LOGE("compile shader failed %s \n", infoLog);
         }
         return shader;
     }
@@ -47,7 +30,7 @@ namespace glutils {
     int linkProgram(int vertexShader, int fragShader) {
         int program = glCreateProgram();
         if (!program) {
-            cout << "crete program failed" << endl;
+            LOGE("crete program failed \n");
         }
         glAttachShader(program, vertexShader);
         glAttachShader(program, fragShader);
@@ -57,16 +40,16 @@ namespace glutils {
         glGetProgramiv(program, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(program, 512, nullptr, infoLog);
-            cout << "link program failed" << infoLog;
+            LOGE("link program failed %s \n", infoLog);
         }
         glDeleteShader(vertexShader);
         glDeleteShader(fragShader);
         return program;
     }
 
-    int loadProgram(string vertexPath,string fragPath) {
-        int vertexShader = loadShader(vertexPath, GL_VERTEX_SHADER);
-        int fragShader = loadShader(fragPath, GL_FRAGMENT_SHADER);
+    int loadProgram(string vertexShaderSource, string fragmentShaderSource) {
+        int vertexShader = loadShader(vertexShaderSource, GL_VERTEX_SHADER);
+        int fragShader = loadShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
         int program = linkProgram(vertexShader, fragShader);
         return program;
     }

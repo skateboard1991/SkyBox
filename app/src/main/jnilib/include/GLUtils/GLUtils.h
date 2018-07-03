@@ -12,8 +12,8 @@
 #define CLIONPROJECTS_GLUTILS_H
 using namespace std;
 namespace glutils{
-    int loadShader(string filePath,int type);
+    int loadShader(string shaderSource,int type);
     int linkProgram(int vertexShader,int fragShader);
-    int loadProgram(string vertexPath,string fragPath);
+    int loadProgram(string vertexShaderSource,string fragmentShaderSource);
 }
 #endif //CLIONPROJECTS_GLUTILS_H
