@@ -9,7 +9,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 
 
-class SkyBoxView(context: Context, attributeSet: AttributeSet?) : GLSurfaceView(context, attributeSet), SurfaceTexture.OnFrameAvailableListener
+class SkyBoxView(context: Context, attributeSet: AttributeSet?) : GLSurfaceView(context, attributeSet)
 {
 
 
@@ -122,12 +122,6 @@ class SkyBoxView(context: Context, attributeSet: AttributeSet?) : GLSurfaceView(
         setRenderer(skyBoxRender)
         renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
 
-    }
-
-
-    override fun onFrameAvailable(surfaceTexture: SurfaceTexture?)
-    {
-        requestRender()
     }
 
     override fun onResume()
